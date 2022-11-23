@@ -1,0 +1,127 @@
+---
+- name: "evacuate the old machine"
+  hosts:
+    - backend
+    - backend_dev
+  vars_files:
+    - vars/global.yml
+    - vars/instance.yml
+  user: root
+  tasks:
+    - import_tasks: tasks/get-instance-id.yml
+
+    - assert:
+        that: instance_id_cmd.stdout == backend.old_instance_id
+
+    - name: stop lighttpd
+      ansible.builtin.service:
+        name: lighttpd
+        state: stopped
+
+    - name: unmount storage
+      mount:
+        path: /var/lib/copr/public_html
+        state: unmounted
+
+    - name: stop mdadm and sync
+      shell: |
+        mdadm --stop /dev/md127
+        sync
+
+# =========================
+
+- name: "detach volumes from the old instance"
+  hosts: localhost
+  vars_files:
+    - vars/global.yml
+    - vars/instance.yml
+  tasks:
+    - name: detach volumes from the old instance
+      amazon.aws.ec2_vol:
+        profile: fedora-copr
+        instance: None
+        id: "{{ item.value }}"
+      loop: "{{ backend.volumes | dict2items }}"
+      tags:
+        - detach_old_instance
+
+# =========================
+
+- name: "Unmount temp volume from the new machine"
+  hosts:
+    - backend_temp
+    - backend_dev_temp
+  gather_facts: true
+  vars_files:
+    - vars/global.yml
+    - vars/instance.yml
+  user: root
+  tags: unmount_temp_storage
+  tasks:
+    - import_tasks: tasks/get-instance-id.yml
+    - assert:
+        that: instance_id_cmd.stdout == backend.new_instance_id
+
+    # Make sure we don't unmoutn the md127 disk
+    - name: unmount storage
+      shell: |
+        systemctl kill lighttpd || :
+        systemctl stop resalloc || :
+          systemctl stop copr-backend.target || :
+        mount | grep /var/lib/copr/public_html | grep /dev/md && exit 1
+        umount /var/lib/copr/public_html || :
+
+# =========================
+
+- name: "Detach the temporary volume from the new instance"
+  hosts: localhost
+  gather_facts: false
+  tags: detach_temp_storage
+  vars_files:
+    - vars/global.yml
+    - vars/instance.yml
+  tasks:
+    - name: detach the temp volumes from the new instance
+      amazon.aws.ec2_vol:
+        profile: fedora-copr
+        instance: None
+        id: "{{ backend.temp_volume }}"
+
+# =========================
+
+- name: "Attach the raid 10 to the new instance"
+  hosts: localhost
+  gather_facts: false
+  tags: move_stuff_to_new_instance
+  vars_files:
+    - vars/global.yml
+    - vars/instance.yml
+  vars:
+    ipv6: 2600:1f18:8ee:ae00:6c8c:e094:1c5b:c2f9
+    ipv4: 18.208.10.131
+
+  tasks:
+    - name: disassociate an elastic IP with a device
+      community.aws.ec2_eip:
+        profile: fedora-copr
+        device_id: "{{ backend.old_network_id }}"
+        ip: "{{ ipv4 }}"
+        in_vpc: true
+        state: absent
+
+    - name: associate an elastic IP with a device
+      community.aws.ec2_eip:
+        profile: fedora-copr
+        device_id: "{{ backend.new_network_id }}"
+        ip: "{{ ipv4 }}"
+        in_vpc: true
+        state: present
+
+    - name: attach volumes to the new instance
+      amazon.aws.ec2_vol:
+        profile: fedora-copr
+        instance: "{{ backend.new_instance_id }}"
+        id: "{{ item.value }}"
+        device_name: "{{ item.key }}"
+        state: present
+      loop: "{{ backend.volumes | dict2items }}"

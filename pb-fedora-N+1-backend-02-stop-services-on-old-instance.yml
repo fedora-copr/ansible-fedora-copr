@@ -1,0 +1,32 @@
+---
+- name: "stop the old machine"
+  hosts:
+    - backend
+    - backend_dev
+
+  vars_files:
+    - vars/global.yml
+    - vars/instance.yml
+
+  user: root
+
+  tasks:
+    - import_tasks: tasks/get-instance-id.yml
+
+    - assert:
+        that: instance_id_cmd.stdout == backend.old_instance_id
+
+    - name: stop resalloc
+      ansible.builtin.service:
+        name: resalloc
+        state: stopped
+
+    - name: stop backend
+      ansible.builtin.service:
+        name: copr-backend.target
+        state: stopped
+
+    - name: stop others
+      shell: |
+        systemctl stop crond
+        systemctl stop *timer
