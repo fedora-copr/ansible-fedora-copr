@@ -1,11 +1,17 @@
 ---
+copr_instance: devel
+
 backend:
+  new_name: copr-backend-dev-new
   old_instance_id: i-00de608ab4b835a1e
   new_instance_id: i-0ba958e718cb91fa3
   image: f37
   temp_volume: vol-071a4075c4b4a788d
   old_network_id: eni-04c3423cfeaaf95b3
   new_network_id: eni-0e8ab38dd6530b7a0
+  instance_type: t3a.medium
+  root_volume_size: 20
+  temp_floating_ip: 52.206.156.120
 
   volumes:
     sdd: vol-0860700f1b82314b5

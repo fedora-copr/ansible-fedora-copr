@@ -9,24 +9,19 @@
 
   vars:
     ansible_python_interpreter: /usr/bin/python3
-    aws_instance_type: t3a.medium
     aws_security_group: copr-backend-sg
-    aws_root_volume_size: 20
-    copr_instance: devel
-
-    backend_temp_floating_ip: 52.206.156.120
 
   tasks:
     - name: create the testing copr-be-dev machine
       amazon.aws.ec2_instance:
-        name: copr-backend-dev-new
+        name: "{{ backend.new_name }}"
         state: running
         profile: fedora-copr
         region: us-east-1
         key_name: "{{ aws_ssh_key }}"
         count: 1
         image_id: "{{ aws_images[backend.image] }}"
-        instance_type: "{{ aws_instance_type }}"
+        instance_type: "{{ backend.instance_type }}"
         detailed_monitoring: true
         network:
           assign_public_ip: true
@@ -40,7 +35,7 @@
           CoprPurpose: infrastructure
         volumes:
           - ebs:
-              volume_size: "{{ aws_root_volume_size }}"
+              volume_size: "{{ backend.root_volume_size }}"
               encrypted: true
               delete_on_termination: true
             device_name: /dev/sda1
@@ -49,7 +44,7 @@
     - name: associate an elastic IP with a device
       community.aws.ec2_eip:
         device_id: "{{ instances_started.instances[0].network_interfaces[0].network_interface_id }}"
-        ip: "{{ backend_temp_floating_ip  }}"
+        ip: "{{ backend.temp_floating_ip  }}"
         in_vpc: true
         state: present
 
@@ -62,7 +57,7 @@
     - name: print ipv4
       debug:
         msg:
-          - "ElasticIP: {{ backend_temp_floating_ip }}"
+          - "ElasticIP: {{ backend.temp_floating_ip }}"
           - "Instance ID: {{ instances_started.instances[0].instance_id }}"
           - "Network ID: {{ instances_started.instances[0].network_interfaces[0].network_interface_id }}"
           - "Unusable Public IP: {{ instances_started.instances[0].public_ip_address }}"
