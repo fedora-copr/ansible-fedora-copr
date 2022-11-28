@@ -5,7 +5,7 @@
 
   vars_files:
     - vars/global.yml
-    - vars/instance.yml
+    - vars/instance-prod.yml
 
   vars:
     ansible_python_interpreter: /usr/bin/python3
@@ -44,7 +44,7 @@
     - name: associate an elastic IP with a device
       community.aws.ec2_eip:
         device_id: "{{ instances_started.instances[0].network_interfaces[0].network_interface_id }}"
-        ip: "{{ backend.temp_floating_ip  }}"
+        ip: "{{ backend.temp_floating_ip }}"
         in_vpc: true
         state: present
 

@@ -2,11 +2,10 @@
 - name: "stop the old machine"
   hosts:
     - backend
-    - backend_dev
 
   vars_files:
     - vars/global.yml
-    - vars/instance.yml
+    - vars/instance-prod.yml
 
   user: root
 
@@ -16,18 +15,20 @@
     - assert:
         that: instance_id_cmd.stdout == backend.old_instance_id
 
+    - name: stop backend
+      ansible.builtin.service:
+        name: copr-backend.target
+        state: stopped
+
     - name: stop some services
       shell: |
         systemctl stop crond
         systemctl stop *timer
-        evacuate builders...
+
+    # TODO: evacuate builders...
+    # kill `ps -o pid,cmd -ax | grep process-build | cut -d' ' -f1`
 
     - name: stop resalloc
       ansible.builtin.service:
         name: resalloc
-        state: stopped
-
-    - name: stop backend
-      ansible.builtin.service:
-        name: copr-backend.target
         state: stopped

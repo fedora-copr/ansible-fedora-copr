@@ -1,12 +1,11 @@
 [backend]
-;copr-be.aws.fedoraproject.org
+copr-be.aws.fedoraproject.org
 
 [backend_temp]
-;copr-be-temp.aws.fedoraproject.org
+copr-be-temp.aws.fedoraproject.org
 
 [backend_dev]
 copr-be-dev.aws.fedoraproject.org
 
 [backend_dev_temp]
-;copr-be-dev-temp.aws.fedoraproject.org
-copr-be-dev.aws.fedoraproject.org
+copr-be-dev-temp.aws.fedoraproject.org
