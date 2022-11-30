@@ -2,7 +2,7 @@
 copr_instance: devel
 
 backend:
-  new_name: copr-backend-dev-new
+  name: copr-backend
   old_instance_id: i-00de608ab4b835a1e
   new_instance_id: i-0ba958e718cb91fa3
   image: f37

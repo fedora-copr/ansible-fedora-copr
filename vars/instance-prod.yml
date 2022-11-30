@@ -2,7 +2,7 @@
 copr_instance: production
 
 backend:
-  new_name: copr-backend-prod-new
+  name: copr-backend
   old_instance_id: i-09741266edffbd3a9
   new_instance_id: i-062172568528899ab
   image: f37

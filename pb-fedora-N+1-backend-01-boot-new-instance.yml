@@ -14,7 +14,7 @@
   tasks:
     - name: create the testing copr-be-dev machine
       amazon.aws.ec2_instance:
-        name: "{{ backend.new_name }}"
+        name: "{{ backend.name }}-{{ copr_instance }}-new"
         state: running
         profile: fedora-copr
         region: us-east-1
