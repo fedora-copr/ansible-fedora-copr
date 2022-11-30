@@ -1,0 +1,30 @@
+---
+- name: "Rename instances"
+  hosts: localhost
+  gather_facts: false
+  tags: detach_temp_storage
+  vars_files:
+    - vars/global.yml
+    - vars/instance-prod.yml
+  tasks:
+    - name: re-name old instances
+      amazon.aws.ec2_instance:
+        profile: fedora-copr
+        instance_ids: "{{ item.old_instance_id }}"
+        name: "{{ item.name  }}-{{ copr_instance }}-old"
+      with_items:
+        - "{{ backend }}"
+        - "{{ frontend }}"
+        - "{{ keygen }}"
+        - "{{ distgit }}"
+
+    - name: re-name new instances
+      amazon.aws.ec2_instance:
+        profile: fedora-copr
+        instance_ids: "{{ item.new_instance_id }}"
+        name: "{{ item.name  }}-{{ copr_instance }}"
+      with_items:
+        - "{{ backend }}"
+        - "{{ frontend }}"
+        - "{{ keygen }}"
+        - "{{ distgit }}"
