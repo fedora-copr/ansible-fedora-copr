@@ -97,9 +97,8 @@
   vars_files:
     - vars/global.yml
     - vars/instance-prod.yml
-  vars:
-    ipv6: 2600:1f18:8ee:ae00:6c8c:e094:1c5b:c2f9
-    ipv4: 18.208.10.131
+  # vars:
+  #   ipv6: 2600:1f18:8ee:ae00:6c8c:e094:1c5b:c2f9
 
   tasks:
     - name: disassociate an elastic IP with a device
