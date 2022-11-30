@@ -12,6 +12,7 @@ backend:
   instance_type: t3a.medium
   root_volume_size: 20
   temp_floating_ip: 52.206.156.120
+  elastic_ip: 18.208.10.131
 
   volumes:
     sdd: vol-0860700f1b82314b5
