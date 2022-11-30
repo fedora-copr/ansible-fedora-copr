@@ -63,9 +63,10 @@
         path: /var/lib/copr/public_html
         state: unmounted
 
-    - name: stop mdadm and sync
+    - name: stop mdadm and sync, sleeps - manual kill needed
       shell: |
         mdadm --stop /dev/md127
+        sleep 1800 || :
         sync
 
 # =========================
