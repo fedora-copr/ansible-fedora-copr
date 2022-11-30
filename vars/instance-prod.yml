@@ -19,3 +19,15 @@ backend:
     sde: vol-0e809c6ef1c11f2c9
     sdf: vol-0188cd4fedb1e7c78
     sdg: vol-025a19c2330fca7cd
+
+frontend:
+  old_instance_id: i-095e237431bca5117
+  new_instance_id: i-04b0ccb2b5985bba7
+
+distgit:
+  old_instance_id: i-0032c90a8d5bec46f
+  new_instance_id: i-03fd462db942a6c8d
+
+keygen:
+  old_instance_id: i-00e5e48ed78824157
+  new_instance_id: i-0efff0067789ed7a9
