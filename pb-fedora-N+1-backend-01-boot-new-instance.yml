@@ -3,57 +3,61 @@
   hosts: localhost
   gather_facts: false
 
+  vars_files:
+    - vars/global.yml
+    - vars/instance-prod.yml
+
   vars:
     ansible_python_interpreter: /usr/bin/python3
-    aws:
-      ssh_key: "Ansible Key"
-      subnets:
-        us_east_1c: subnet-0995f6a466849f4c3
-      image: ami-023fb534213ca41da
-      security_group: copr-backend-sg
-      instance_type: t3a.medium
-      root_volume_size: 20
-      initial_volume: vol-071a4075c4b4a788d
-    copr_instance: devel
+    aws_security_group: copr-backend-sg
 
   tasks:
     - name: create the testing copr-be-dev machine
       amazon.aws.ec2_instance:
-        name: copr-backend-dev-new
+        name: "{{ backend.name }}-{{ copr_instance }}-new"
         state: running
         profile: fedora-copr
         region: us-east-1
-        key_name: "{{ aws.ssh_key }}"
+        key_name: "{{ aws_ssh_key }}"
         count: 1
-        image_id: "{{ aws.image }}"
-        instance_type: "{{ aws.instance_type }}"
+        image_id: "{{ aws_images[backend.image] }}"
+        instance_type: "{{ backend.instance_type }}"
         detailed_monitoring: true
         network:
           assign_public_ip: true
-        vpc_subnet_id: "{{ aws.subnets.us_east_1c }}"
-        security_group: "{{ aws.security_group }}"
+        vpc_subnet_id: "{{ infra_subnet }}"
+        security_group: "{{ aws_security_group }}"
         termination_protection: true
         wait: true
         tags:
           FedoraGroup: copr
-          CoprInstance: "{{ copr_instance }}"
+          CoprInstance: "{{ copr_instance_tag }}"
           CoprPurpose: infrastructure
         volumes:
           - ebs:
-              volume_size: "{{ aws.root_volume_size }}"
+              volume_size: "{{ backend.root_volume_size }}"
               encrypted: true
               delete_on_termination: true
             device_name: /dev/sda1
       register: instances_started
 
+    - name: associate an elastic IP with a device
+      community.aws.ec2_eip:
+        device_id: "{{ instances_started.instances[0].network_interfaces[0].network_interface_id }}"
+        ip: "{{ backend.temp_floating_ip }}"
+        in_vpc: true
+        state: present
+
     - name: attach the intial data volume
       amazon.aws.ec2_vol:
         instance: "{{ instances_started.instances[0].instance_id }}"
-        id: "{{ aws.initial_volume }}"
+        id: "{{ backend.temp_volume }}"
         device_name: sdc
 
     - name: print ipv4
       debug:
         msg:
-          - "Public IP: {{ instances_started.instances[0].public_ip_address }}"
+          - "ElasticIP: {{ backend.temp_floating_ip }}"
           - "Instance ID: {{ instances_started.instances[0].instance_id }}"
+          - "Network ID: {{ instances_started.instances[0].network_interfaces[0].network_interface_id }}"
+          - "Unusable Public IP: {{ instances_started.instances[0].public_ip_address }}"

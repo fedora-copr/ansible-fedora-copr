@@ -1,0 +1,5 @@
+---
+infra_subnet: subnet-0995f6a466849f4c3
+aws_ssh_key: "Ansible Key"
+aws_images:
+  f37: ami-023fb534213ca41da

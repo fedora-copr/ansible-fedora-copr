@@ -1,0 +1,7 @@
+#! /bin/bash
+
+set -ex
+set -x
+dirname=$(dirname "$(readlink -f "$0")")
+cd "$dirname"
+ansible-playbook -i "inventory" "$@"

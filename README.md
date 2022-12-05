@@ -18,5 +18,5 @@ Prepare the `~/.aws/credentials` file.  It needs to contain the following:
 
 Prepare the `~/.aws/config` file.  It needs to contain the following:
 
-    [fedora-copr]
+    [profile fedora-copr]
     region = us-east-1
