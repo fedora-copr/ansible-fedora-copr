@@ -1,0 +1,83 @@
+---
+- name: "raid"
+  hosts: localhost
+  gather_facts: false
+
+  vars_files:
+    - vars/private.yml
+
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    volume_size: 125
+
+  tasks:
+    - name: create test raid 10 instance
+      amazon.aws.ec2_instance:
+        name: copr-backend-dev-raid-10
+        key_name: "{{ aws.ssh_key }}"
+        count: 1
+        image_id: "{{ aws.image.rhel8 }}"
+        instance_type: t3a.xlarge
+        detailed_monitoring: true
+        network:
+          assign_public_ip: true
+        vpc_subnet_id: "{{ aws.subnets.us_east_1c }}"
+        security_group: copr-gluster-node
+        wait: true
+        tags:
+          FedoraGroup: copr
+          CoprPurpose: storage
+          CoprInstance: production
+
+        volumes:
+          - ebs:
+              volume_size: "{{ volume_size }}"
+              delete_on_termination: false
+              volume_type: sc1
+            device_name: /dev/sdf
+          - ebs:
+              volume_size: "{{ volume_size }}"
+              delete_on_termination: false
+              volume_type: sc1
+            device_name: /dev/sdg
+          - ebs:
+              volume_size: "{{ volume_size }}"
+              delete_on_termination: false
+              volume_type: sc1
+            device_name: /dev/sdh
+          - ebs:
+              volume_size: "{{ volume_size }}"
+              delete_on_termination: false
+              volume_type: sc1
+            device_name: /dev/sdi
+
+          #- ebs:
+          #    volume_size: "{{ volume_size }}"
+          #    delete_on_termination: true
+          #    volume_type: sc1
+          #  device_name: /dev/sdj
+          #- ebs:
+          #    volume_size: "{{ volume_size }}"
+          #    delete_on_termination: true
+          #    volume_type: sc1
+          #  device_name: /dev/sdk
+          #- ebs:
+          #    volume_size: "{{ volume_size }}"
+          #    delete_on_termination: true
+          #    volume_type: sc1
+          #  device_name: /dev/sdl
+          #- ebs:
+          #    volume_size: "{{ volume_size }}"
+          #    delete_on_termination: true
+          #    volume_type: sc1
+          #  device_name: /dev/sdm
+          #- ebs:
+          #    volume_size: "{{ volume_size }}"
+          #    delete_on_termination: true
+          #    volume_type: sc1
+          #  device_name: /dev/sdn
+          #- ebs:
+          #    volume_size: "{{ volume_size }}"
+          #    delete_on_termination: true
+          #    volume_type: sc1
+          #  device_name: /dev/sdo
