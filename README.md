@@ -20,3 +20,16 @@ Prepare the `~/.aws/config` file.  It needs to contain the following:
 
     [profile fedora-copr]
     region = us-east-1
+
+Create `vars/private.yml`, can be empty, but more likely:
+
+```yaml
+aws_ssh_key: frostyx-2
+```
+
+Dependencies
+------------
+
+```
+ansible-galaxy collection install amazon.aws
+```
