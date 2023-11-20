@@ -1,0 +1,6 @@
+---
+- name: "Detecting copr instance"
+  set_fact:
+    copr_instance: "{{ copr_instance | default('dev') }}"
+    ansible_python_interpreter: /usr/bin/python3
+  tags: always

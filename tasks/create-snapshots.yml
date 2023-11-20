@@ -1,0 +1,28 @@
+---
+- amazon.aws.ec2_snapshot:
+    volume_id: "{{ item }}"
+    snapshot_tags:
+      FedoraGroup: copr
+      CoprPurpose: infrastructure
+      CoprInstance: "{{ copr_instance_tag }}"
+      OriginalVolume: "{{ item }}"
+      Name: "backup-data-{{ server.name }}-{{ copr_instance }}-{{ lookup('pipe', 'date -I') }}-{{ index }}-{{ snapshot_suffix | default('UNKNOWN') }}"
+      DeleteAfter: '{{ lookup("pipe", "date --date=5days +%s") }}'
+    region: us-east-1
+    profile: fedora-copr
+    wait: false
+  loop: "{{ volume_ids }}"
+  loop_control:
+    index_var: index
+  register: snapshot_request
+
+- name: detect snapshot ids
+  set_fact:
+    snapshot_ids: "{{ snapshot_request.results|map(attribute='snapshot_id') }}"
+
+- name: "These snapshots were created"
+  debug: var=snapshot_ids
+  changed_when: true
+
+- pause:
+    prompt: "Check that he volumes above are created successfully and hit enter"

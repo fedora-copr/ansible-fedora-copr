@@ -1,0 +1,17 @@
+---
+- name: "Pick appropriate groups for localhost"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - import_tasks: tasks/localhost-group-placement.yml
+  tags: always
+
+- name: "Start new machine"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - import_tasks: tasks/new-instance.yml
+      vars:
+        instance: "{{ lookup('vars', server_id) }}"

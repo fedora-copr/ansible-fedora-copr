@@ -1,0 +1,145 @@
+---
+- name: "Pick appropriate groups for localhost"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - import_tasks: tasks/localhost-group-placement.yml
+  tags: always
+
+- name: "Unmount temp volume from the new machine"
+  hosts: "backend:&next:&{{ copr_instance }}"
+  remote_user: root
+  tags: unmount_temp_storage
+  tasks:
+    - import_tasks: tasks/assert-instance-id.yml
+      vars:
+        instance_id: "{{ backend.new_instance_id }}"
+
+    - name: stop services touching the result directory
+      import_tasks: tasks/stop-backend-services.yml
+
+    - name: assert that we are not umounting volume group or raid
+      shell: mount | grep {{ backend_storage_mount }} | grep -e md -e mapper && exit 1 || true
+      changed_when: false
+
+    - name: umount the temporary mountpoint
+      ansible.posix.mount:
+        path: "{{ backend_storage_mount }}"
+        state: unmounted
+
+# =========================
+
+- name: "Detach the temporary volume from the new instance"
+  hosts: localhost
+  connection: local
+  tags: detach_temp_storage
+  tasks:
+    - name: detach the temp volumes from the new instance
+      amazon.aws.ec2_vol:
+        profile: fedora-copr
+        instance: None  # None here means detach.
+        id: "{{ backend.temp_volume }}"
+
+# =========================
+
+- name: "evacuate the old machine"
+  hosts: "backend:&old:&{{ copr_instance }}"
+  remote_user: root
+  tasks:
+    - import_tasks: tasks/assert-instance-id.yml
+      vars:
+        instance_id: "{{ backend.old_instance_id }}"
+
+    - name: assert we are umounting volume group
+      shell: mount | grep {{ backend_storage_mount }} | grep mapper
+      changed_when: false
+
+    - name: stop all services on the old machine
+      import_tasks: tasks/stop-backend-services.yml
+      vars:
+        stop_all_services: true
+
+    - name: umount the result dir
+      ansible.posix.mount:
+        path: "{{ backend_storage_mount }}"
+        state: unmounted
+
+    - name: deactivate volume group hosting the results
+      community.general.lvg:
+        state: inactive
+        vg: copr-backend-data
+
+    - name: stop mds - this task sleeps 30m - check and kill manually
+      shell: |
+        mdadm --stop "/dev/md/{{ item }}"
+        sync
+      loop:
+        - "2ndraid{% if copr_instance == 'dev' %}-dev{% endif %}_0"
+        - copr-backend-data_0
+
+    - pause:
+        prompt: "Please check /proc/mdstat and hit ENTER"
+
+# =========================
+
+- name: "detach volumes from the old instance"
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: requesting copr backend volume snapshots
+      include_tasks: tasks/create-snapshots-backend.yml
+      vars:
+        snapshot_suffix: "clean"
+
+    # NEVER EVER EVER use state=absent, that deletes the volume
+    - name: detach volumes from the old instance
+      amazon.aws.ec2_vol:
+        profile: fedora-copr
+        state: present
+        # None here means "detach"
+        instance: None
+        id: "{{ item.value }}"
+      loop: "{{ backend.volumes | dict2items }}"
+  tags:
+    - detach_old_instance
+
+# =========================
+
+- name: "Attach resources to the new instance"
+  hosts: localhost
+  connection: local
+  tags: move_stuff_to_new_instance
+
+  tasks:
+    - name: disassociate the elastic IP from the old device
+      community.aws.ec2_eip:
+        profile: fedora-copr
+        device_id: "{{ backend.old_network_id }}"
+        ip: "{{ backend.elastic_ip }}"
+        in_vpc: true
+        state: absent
+
+    - name: associate the elastic IP with a new device
+      community.aws.ec2_eip:
+        profile: fedora-copr
+        device_id: "{{ backend.new_network_id }}"
+        ip: "{{ backend.elastic_ip }}"
+        in_vpc: true
+        state: present
+
+    - name: attach volumes to the new instance
+      amazon.aws.ec2_vol:
+        profile: fedora-copr
+        instance: "{{ backend.new_instance_id }}"
+        id: "{{ item.value }}"
+        device_name: "{{ item.key }}"
+        state: present
+      loop: "{{ backend.volumes | dict2items }}"
+
+    - name: reassign ipv6 address
+      import_tasks: tasks/reassign-ipv6.yml
+      vars:
+        ipv6: "{{ backend.ipv6 }}"
+        old_eni: "{{ backend.old_network_id }}"
+        new_eni: "{{ backend.new_network_id }}"

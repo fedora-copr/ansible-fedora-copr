@@ -1,0 +1,7 @@
+---
+- name: list volumes that need to be snapshotted
+  debug: var=volumes
+  when: volumes is defined
+
+- pause:
+    prompt: "Do manual backup: {{ message | default('no message') }}"

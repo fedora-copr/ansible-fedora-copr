@@ -1,0 +1,9 @@
+---
+- import_tasks: tasks/detect-copr-instance.yml
+
+- name: "Placing localhost machine into the '{{ copr_instance | default('dev') }}' group"
+  add_host:
+    groups: "{{ copr_instance }}"
+    name: localhost
+  tags: always
+  changed_when: false

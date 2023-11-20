@@ -1,0 +1,19 @@
+---
+- name: "Pick appropriate groups for localhost"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - import_tasks: tasks/localhost-group-placement.yml
+  tags: always
+
+- name: "Snapshot data volumes for Copr Backend {{ copr_instance }}"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - include_tasks: tasks/create-snapshots-backend.yml
+      vars:
+        snapshot_suffix: "hot-and-not-clean"
+      when:
+        - copr_instance is defined
