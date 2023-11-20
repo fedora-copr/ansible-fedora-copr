@@ -1,0 +1,35 @@
+---
+- name: stopping services touching result dir
+  service:
+    state: stopped
+    name: "{{ item }}"
+  loop:
+    - lighttpd
+    - copr-backend.target
+
+- name: kill all background workers touching result dir
+  shell: |
+    systemctl kill copr-backend-build  --signal=SIGKILL || :
+    systemctl kill copr-backend-action --signal=SIGKILL || :
+
+- name: delete all resalloc resources
+  pause:
+    prompt: "Please delete all resalloc workers and hit ENTER"
+
+- name: stopping all backend services
+  service:
+    state: stopped
+    name: "{{ item }}"
+  loop:
+    - resalloc
+    - crond
+  when: stop_all_services is defined
+
+- name: stop timers
+  shell: systemctl stop *timer
+  when: stop_all_services is defined
+
+- import_tasks: tasks/wait-for-unused-mountpoint.yml
+  vars:
+    mountpoints:
+      - "{{ backend_storage_mount }}"

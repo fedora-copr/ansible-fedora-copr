@@ -1,0 +1,104 @@
+---
+copr_instance: dev
+copr_instance_tag: devel
+copr_zone: us-east-1c
+
+backend:
+  name: copr-backend
+  old_instance_id: i-0ba958e718cb91fa3
+  new_instance_id: i-0007e54a85c0e56b1
+  image: f39
+  # this is volume `data-copr-upgrade-time-{{ copr_instance }}` that is used as
+  # a temporary data volume until the newly installed backend is ready to
+  # consume real data volume.
+  temp_volume: vol-03ea76b80451f0e07
+  old_network_id: eni-0e8ab38dd6530b7a0
+  new_network_id: eni-06f1004afbc765f47
+  instance_type: t3a.medium
+  root_volume_size: 20
+  temp_floating_ip: 52.206.156.120
+  elastic_ip: 18.208.10.131
+  security_group: copr-backend-sg
+  ipv6: 2600:1f18:8ee:ae00:6c8c:e094:1c5b:c2f9
+
+  volumes:
+    sdd: vol-0860700f1b82314b5
+    sde: vol-00ee3a18d4b88bd2d
+    sdf: vol-01d7d16e5e447b3c4
+    sdg: vol-0ea433a88aef9c644
+    sdh: vol-0038e042c49987b82
+    sdi: vol-0ce8220e998e2e32a
+
+frontend:
+  name: copr-frontend
+  image: f39
+  old_instance_id: i-0327627d968a3bf0d
+  new_instance_id: i-0e737522fecb1ae89
+  instance_type: t3a.medium
+  security_group: copr-frontend-sg
+  root_volume_size: 50
+  old_network_id: eni-0f1a7186413ad3403
+  new_network_id: eni-072f588f174d5820b
+  elastic_ip: 18.208.24.211
+  ipv6: 2600:1f18:8ee:ae00:66a:fd15:3f16:4092
+
+  stop_services:
+    before_backup:
+      - fm-consumer@copr_messaging
+      - httpd
+      - crond
+    after_backup:
+      - postgresql
+
+  data_volumes:
+    - id: vol-03b78541e43c23021
+      mount_points:
+        - /var/lib/pgsql
+        - /srv/copr-fe
+
+distgit:
+  name: copr-distgit
+  image: f39
+  old_instance_id: i-07385d1de97548caf
+  new_instance_id: i-0e85a23f4e499cd58
+  instance_type: t3a.medium
+  security_group: copr-distgit-sg
+  root_volume_size: 80
+  old_network_id: eni-022cb85d663e09b82
+  new_network_id: eni-0b19d1d6610bdaa5d
+  elastic_ip: 54.243.51.13
+  ipv6: 2600:1f18:8ee:ae00:691b:4103:dbcd:a64a
+
+  stop_services:
+    before_backup:
+      - copr-dist-git
+      - httpd
+      - crond
+
+  data_volumes:
+    - id: vol-0bc5f6904b9da0972
+      mount_points:
+        - /var/lib/dist-git
+
+keygen:
+  name: copr-keygen
+  image: f39
+  old_instance_id: i-0ffc8539fd59952a6
+  new_instance_id: i-0ec824ef7f3f0f0ad
+  instance_type: t3a.small
+  security_group: copr-keygen-sg
+  root_volume_size: 20
+  old_network_id: eni-05efe979308675701
+  new_network_id: eni-0bb5cdea555ed50e9
+  elastic_ip: 54.225.23.248
+  ipv6: 2600:1f18:8ee:ae00:3cbb:7920:d83:e607
+
+  stop_services:
+    before_backup:
+      - httpd
+      - signd
+
+  data_volumes:
+    - id: vol-0383a1433fc96211d
+      mount_points:
+        - /var/lib/copr-keygen

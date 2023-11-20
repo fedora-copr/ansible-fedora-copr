@@ -1,0 +1,101 @@
+---
+- name: "Pick appropriate groups for localhost"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - import_tasks: tasks/localhost-group-placement.yml
+  tags: always
+
+- name: "evacuate the old {{ server_id }}"
+  hosts: "{{ server_id }}:&{{ copr_instance }}"
+  remote_user: root
+  tasks:
+    - set_fact:
+        server: "{{ lookup('vars', server_id) }}"
+
+    - import_tasks: tasks/assert-instance-id.yml
+      vars:
+        instance_id: "{{ server.old_instance_id }}"
+
+    - name: stop services before the backup
+      service:
+        name: "{{ item }}"
+        state: stopped
+      loop: "{{ server.stop_services.before_backup }}"
+      when: server.stop_services.before_backup is defined
+
+    - pause:
+        prompt: "Please backup PostgreSQL data now: https://docs.pagure.org/copr.copr/database_backup.html and hit ENTER"
+      when: server_id == 'frontend'
+
+    - name: stop other services after the backup
+      service:
+        name: "{{ item }}"
+        state: stopped
+      loop: "{{ server.stop_services.after_backup }}"
+      when: server.stop_services.after_backup is defined
+
+    - include_tasks: tasks/wait-for-unused-mountpoint.yml
+      vars:
+        mountpoints: "{{ server.data_volumes | map(attribute='mount_points') | flatten }}"
+
+    - name: unmount mountpoints
+      ansible.posix.mount:
+        path: "{{ item }}"
+        state: unmounted
+      loop: "{{ server.data_volumes | map(attribute='mount_points') | flatten }}"
+
+- name: "Reattach resources"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - set_fact:
+        server: "{{ lookup('vars', server_id) }}"
+
+    - import_tasks: tasks/create-snapshots.yml
+      vars:
+        server: "{{ server }}"
+        volume_ids: "{{ server.data_volumes | map(attribute='id') }}"
+        snapshot_suffix: "clean"
+
+    - name: detach the volume from the old instance
+      amazon.aws.ec2_vol:
+        profile: fedora-copr
+        instance: None  # None here means detach.
+        id: "{{ item }}"
+      loop: "{{ server.data_volumes | map(attribute='id') }}"
+
+    - name: attach the volume to the new instance
+      amazon.aws.ec2_vol:
+        profile: fedora-copr
+        instance: "{{ server.new_instance_id }}"
+        id: "{{ item }}"
+      loop: "{{ server.data_volumes | map(attribute='id') | list }}"
+
+    - pause:
+        prompt: going to move IPs to the new machine, won't be accessible, OK?
+
+    - name: disassociate the elastic IP from the old device
+      community.aws.ec2_eip:
+        profile: fedora-copr
+        device_id: "{{ server.old_network_id }}"
+        ip: "{{ server.elastic_ip }}"
+        in_vpc: true
+        state: absent
+
+    - name: associate the elastic IP with a new device
+      community.aws.ec2_eip:
+        profile: fedora-copr
+        device_id: "{{ server.new_network_id }}"
+        ip: "{{ server.elastic_ip }}"
+        in_vpc: true
+        state: present
+
+    - name: reassign ipv6 address
+      import_tasks: tasks/reassign-ipv6.yml
+      vars:
+        ipv6: "{{ server.ipv6 }}"
+        old_eni: "{{ server.old_network_id }}"
+        new_eni: "{{ server.new_network_id }}"

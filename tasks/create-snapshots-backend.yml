@@ -1,0 +1,5 @@
+---
+- import_tasks: tasks/create-snapshots.yml
+  vars:
+    volume_ids: "{{ backend.volumes | dict2items | map(attribute='value') }}"
+    server: "{{ backend }}"

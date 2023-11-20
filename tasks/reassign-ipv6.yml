@@ -1,0 +1,12 @@
+---
+- name: "drop {{ ipv6 }} from {{ old_eni }}"
+  ansible.builtin.command: >
+    aws ec2 --profile fedora-copr  unassign-ipv6-addresses
+      --ipv6-addresses {{ ipv6 }} --network-interface-id {{ old_eni }}
+  delegate_to: localhost
+
+- name: "add {{ ipv6 }} to {{ new_eni }}"
+  ansible.builtin.command: >
+    aws ec2 --profile fedora-copr assign-ipv6-addresses
+    --ipv6-addresses {{ ipv6 }} --network-interface-id {{ new_eni }}
+  delegate_to: localhost

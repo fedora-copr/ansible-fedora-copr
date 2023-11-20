@@ -1,0 +1,69 @@
+---
+- name: "create the testing {{ instance.name }}-{{ copr_instance }}-new machine"
+  amazon.aws.ec2_instance:
+    name: "{{ instance.name }}-{{ copr_instance }}-new"
+    state: running
+    profile: fedora-copr
+    region: us-east-1
+    key_name: "{{ aws_ssh_key }}"
+    count: 1
+    image_id: "{{ aws_images[instance.image] }}"
+    instance_type: "{{ instance.instance_type }}"
+    detailed_monitoring: true
+    network:
+      assign_public_ip: true
+    vpc_subnet_id: "{{ infra_subnet }}"
+    security_group: "{{ instance.security_group }}"
+    termination_protection: true
+    wait: true
+    tags:
+      FedoraGroup: copr
+      CoprInstance: "{{ copr_instance_tag }}"
+      CoprPurpose: infrastructure
+    volumes:
+      - ebs:
+          volume_size: "{{ instance.root_volume_size }}"
+          encrypted: true
+          delete_on_termination: true
+        device_name: /dev/sda1
+  register: instances_started
+
+- set_fact:
+    root_vol_id: "{{ instances_started.instances.0.block_device_mappings.0.ebs.volume_id }}"
+
+- name: "assign better name to the root volume {{ root_vol_id }}"
+  amazon.aws.ec2_vol:
+    profile: fedora-copr
+    id: "{{ root_vol_id }}"
+    zone: "{{ copr_zone }}"
+    tags:
+      Name: "{{ instance.name }}-{{ copr_instance }}-root-volume"
+      FedoraGroup: copr
+      CoprInstance: "{{ copr_instance_tag }}"
+      CoprPurpose: infrastructure
+    purge_tags: yes
+
+- name: associate a temporary elastic IP with the new eni
+  community.aws.ec2_eip:
+    device_id: "{{ instances_started.instances[0].network_interfaces[0].network_interface_id }}"
+    ip: "{{ instance.temp_floating_ip }}"
+    in_vpc: true
+    state: present
+  when:
+    - instance.temp_floating_ip is defined
+
+- name: attach the temporary data volume
+  amazon.aws.ec2_vol:
+    instance: "{{ instances_started.instances[0].instance_id }}"
+    id: "{{ instance.temp_volume }}"
+    device_name: sdc
+  when:
+    - instance.temp_volume is defined
+
+- name: print ipv4
+  debug:
+    msg:
+      - "ElasticIP: {{ instance.temp_floating_ip | default('not specified') }}"
+      - "Instance ID: {{ instances_started.instances[0].instance_id }}"
+      - "Network ID: {{ instances_started.instances[0].network_interfaces[0].network_interface_id }}"
+      - "Unusable Public IP: {{ instances_started.instances[0].public_ip_address }}"

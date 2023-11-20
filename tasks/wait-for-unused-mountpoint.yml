@@ -1,0 +1,8 @@
+---
+- name: "install lsof to detect mountpoint usage"
+  package: name=lsof state=present
+
+- name: "wait if something is still using the mountpoint"
+  shell: while lsof "{{ item }}"; do sleep 1; done
+  loop: "{{ mountpoints }}"
+  changed_when: false

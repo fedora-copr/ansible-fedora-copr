@@ -1,0 +1,8 @@
+---
+- name: detect instance id
+  import_tasks: tasks/get-instance-id.yml
+
+- name: assert that the instance id is {{ instance_id }}
+  assert:
+    that: instance_id_cmd.stdout == instance_id
+    success_msg: "Correct instance: {{ instance_id }}"

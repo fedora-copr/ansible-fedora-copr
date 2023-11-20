@@ -1,11 +1,41 @@
-[backend]
-copr-be.aws.fedoraproject.org
+localhost
 
-[backend_temp]
+[next]
 copr-be-temp.aws.fedoraproject.org
+copr-be-dev-temp.aws.fedoraproject.org
 
-[backend_dev]
+[old]
+copr-be.aws.fedoraproject.org
 copr-be-dev.aws.fedoraproject.org
 
-[backend_dev_temp]
+[dev]
+copr-be-dev.aws.fedoraproject.org
+copr-fe-dev.aws.fedoraproject.org
+copr-dist-git-dev.aws.fedoraproject.org
+copr-keygen-dev.aws.fedoraproject.org
 copr-be-dev-temp.aws.fedoraproject.org
+
+[prod]
+copr-be.aws.fedoraproject.org
+copr-fe.aws.fedoraproject.org
+copr-dist-git.aws.fedoraproject.org
+copr-keygen.aws.fedoraproject.org
+copr-be-temp.aws.fedoraproject.org
+
+[backend]
+copr-be.aws.fedoraproject.org
+copr-be-dev.aws.fedoraproject.org
+copr-be-temp.aws.fedoraproject.org
+copr-be-dev-temp.aws.fedoraproject.org
+
+[frontend]
+copr-fe.aws.fedoraproject.org
+copr-fe-dev.aws.fedoraproject.org
+
+[distgit]
+copr-dist-git.aws.fedoraproject.org
+copr-dist-git-dev.aws.fedoraproject.org
+
+[keygen]
+copr-keygen.aws.fedoraproject.org
+copr-keygen-dev.aws.fedoraproject.org
