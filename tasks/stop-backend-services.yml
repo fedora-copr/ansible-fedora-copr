@@ -31,7 +31,7 @@
 
 - name: delete all resalloc resources
   pause:
-    prompt: "Please wait until there are no resalloc workers and hit ENTER"
+    prompt: "Please (a) kill prunerepo tasks and (b) wait until there are no resalloc workers, then hit ENTER"
   when: stop_all_services is defined
 
 - name: stopping all backend services
