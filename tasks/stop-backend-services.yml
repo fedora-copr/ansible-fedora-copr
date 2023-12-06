@@ -13,10 +13,9 @@
     - lighttpd
     - copr-backend.target
 
-- name: kill all background workers touching result dir
+- name: kill all build workers potentially touching result dir
   shell: |
     systemctl kill copr-backend-build  --signal=SIGKILL || :
-    systemctl kill copr-backend-action --signal=SIGKILL || :
 
 - name: dont allocate new builders
   replace:
@@ -31,8 +30,17 @@
 
 - name: delete all resalloc resources
   pause:
-    prompt: "Please (a) kill prunerepo tasks and (b) wait until there are no resalloc workers, then hit ENTER"
+    prompt: |
+      Please,
+      (a) wait for prunerepo processes, or kill them,
+      (b) wait for action processing workers, or kill them (preferably not)
+      (c) wait until there are no resalloc workers
+      then hit ENTER
   when: stop_all_services is defined
+
+- name: kill all action workers potentially touching result dir
+  shell: |
+    systemctl kill copr-backend-action --signal=SIGKILL || :
 
 - name: stopping all backend services
   service:
