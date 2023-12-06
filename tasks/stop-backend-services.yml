@@ -1,4 +1,10 @@
 ---
+
+# We run this task file twice.  First against the new backend with a temporary
+# disk mounted, then against the old backend with the real data mounted.  The
+# 'stop_all_services' is defined only for the second run (for the first run, it
+# is not necessary to stop resalloc, because services_disabled=true).
+
 - name: stopping services touching result dir
   service:
     state: stopped
@@ -12,9 +18,21 @@
     systemctl kill copr-backend-build  --signal=SIGKILL || :
     systemctl kill copr-backend-action --signal=SIGKILL || :
 
+- name: dont allocate new builders
+  replace:
+    path: /etc/resallocserver/pools.yaml
+    regexp: 'max: \d+'
+    replace: 'max: 0'
+  when: stop_all_services is defined
+
+- name: evacuate all builders
+  shell: "su - resalloc -c 'resalloc-maint resource-delete --all'"
+  when: stop_all_services is defined
+
 - name: delete all resalloc resources
   pause:
-    prompt: "Please delete all resalloc workers and hit ENTER"
+    prompt: "Please wait until there are no resalloc workers and hit ENTER"
+  when: stop_all_services is defined
 
 - name: stopping all backend services
   service:
