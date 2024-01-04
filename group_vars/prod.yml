@@ -34,7 +34,7 @@ frontend:
   image: f39
   old_instance_id: i-04b0ccb2b5985bba7
   new_instance_id: i-048189a43dcb739a6
-  instance_type: t3a.xlarge
+  instance_type: t3a.2xlarge
   security_group: copr-frontend-sg
   root_volume_size: 80
   old_network_id: eni-09fca769a05dff511
@@ -85,7 +85,7 @@ keygen:
   image: f39
   old_instance_id: i-0efff0067789ed7a9
   new_instance_id: i-01b4f20bd9fb1bea6
-  instance_type: t3a.xlarge
+  instance_type: c7a.xlarge
   security_group: copr-keygen-sg
   root_volume_size: 20
   old_network_id: eni-08ad9c334ac0f4a45
