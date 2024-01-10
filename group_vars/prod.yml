@@ -61,7 +61,7 @@ distgit:
   image: f39
   old_instance_id: i-03fd462db942a6c8d
   new_instance_id: i-06535db0487ba6efb
-  instance_type: t3a.xlarge
+  instance_type: r7a.xlarge
   security_group: copr-distgit-sg
   root_volume_size: 80
   old_network_id: eni-0e0cf9800a99f6437
