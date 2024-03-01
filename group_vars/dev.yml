@@ -15,7 +15,7 @@ backend:
   old_network_id: eni-0e8ab38dd6530b7a0
   new_network_id: eni-06f1004afbc765f47
   instance_type: t3a.medium
-  root_volume_size: 20
+  root_volume_size: 30
   temp_floating_ip: 52.206.156.120
   elastic_ip: 18.208.10.131
   security_group: copr-backend-sg
