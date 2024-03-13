@@ -24,6 +24,7 @@
         - "{{ frontend }}"
         - "{{ keygen }}"
         - "{{ distgit }}"
+        - "{{ pulp }}"
 
     - name: re-name new instances
       amazon.aws.ec2_instance:
@@ -39,3 +40,4 @@
         - "{{ frontend }}"
         - "{{ keygen }}"
         - "{{ distgit }}"
+        - "{{ pulp }}"

@@ -102,3 +102,17 @@ keygen:
     - id: vol-0383a1433fc96211d
       mount_points:
         - /var/lib/copr-keygen
+
+pulp:
+  name: copr-pulp
+  image: rhel9
+  old_instance_id: i-0dc6604b4d517bdcd
+  new_instance_id: i-04bfc4548894724fb
+  instance_type: c7a.large
+  security_group: copr-pulp-sg
+  root_volume_size: 20
+  old_network_id: eni-0f12e86e20d449733
+  new_network_id: eni-027409ac416db9546
+  elastic_ip: 44.206.10.188
+  ipv6: 2600:1f18:8ee:ae00:c607:4520:249f:6cc8
+  data_volumes: []
