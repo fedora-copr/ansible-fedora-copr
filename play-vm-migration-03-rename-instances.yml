@@ -1,6 +1,7 @@
 ---
 - name: "Pick appropriate groups for localhost"
   hosts: localhost
+  gather_facts: false
   connection: local
   tasks:
     - import_tasks: tasks/localhost-group-placement.yml
@@ -8,6 +9,7 @@
 
 - name: "Rename instances"
   hosts: localhost
+  gather_facts: false
   connection: local
   tasks:
     - name: re-name old instances
@@ -19,18 +21,18 @@
         tags:
           CoprFedoraNextWorkflow: old
         termination_protection: false
+      ignore_errors: true  # keep renaming the new instances below
       with_items:
         - "{{ backend }}"
         - "{{ frontend }}"
         - "{{ keygen }}"
         - "{{ distgit }}"
-        - "{{ pulp }}"
 
     - name: re-name new instances
       amazon.aws.ec2_instance:
         profile: fedora-copr
         instance_ids: "{{ item.new_instance_id }}"
-        name: "{{ item.name  }}-{{ copr_instance }}"
+        name: "{{ item.name }}-{{ copr_instance }}"
         purge_tags: false
         tags:
           CoprFedoraNextWorkflow: new
@@ -40,4 +42,3 @@
         - "{{ frontend }}"
         - "{{ keygen }}"
         - "{{ distgit }}"
-        - "{{ pulp }}"

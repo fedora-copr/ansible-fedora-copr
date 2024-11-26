@@ -53,6 +53,7 @@
   tasks:
     - set_fact:
         server: "{{ lookup('vars', server_id) }}"
+      tags: always
 
     - import_tasks: tasks/create-snapshots.yml
       vars:

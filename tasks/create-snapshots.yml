@@ -25,4 +25,4 @@
   changed_when: true
 
 - pause:
-    prompt: "Check that he volumes above are created successfully and hit enter"
+    prompt: "Check that the snapshots above have been created successfully and hit enter"

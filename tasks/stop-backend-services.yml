@@ -8,6 +8,7 @@
 - name: stopping services touching result dir
   service:
     state: stopped
+    enabled: false
     name: "{{ item }}"
   loop:
     - lighttpd
@@ -45,6 +46,7 @@
 - name: stopping all backend services
   service:
     state: stopped
+    enabled: false
     name: "{{ item }}"
   loop:
     - resalloc
