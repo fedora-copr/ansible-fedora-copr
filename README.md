@@ -42,8 +42,7 @@ files before you execute it.
   Copr Backend instance (stops VGs and RAIDs, unmounts the storage), attaches
   the data volumes to the new backend instance, moves v4/v6 IPs.
 - `play-vm-migration-02-migrate-non-backend-box.yml` — performs similar task to
-  the above playbook, but for non-backend instances (frontend, keygen, distgit,
-  pulp)
+  the above playbook, but for non-backend instances (frontend, keygen, distgit)
 - `play-vm-migration-03-rename-instances.yml` — drops the `-new` suffix from
   the new instances' `Name` tags, and ads `-old` suffix to the old instances.
 
