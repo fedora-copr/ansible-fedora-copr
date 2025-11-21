@@ -70,7 +70,7 @@
         state: inactive
         vg: copr-backend-data
 
-    - name: stop mds - this task sleeps 30m - check and kill manually
+    - name: stop mds
       shell: |
         mdadm --stop "/dev/md/{{ item }}"
         sync
@@ -79,6 +79,7 @@
         - copr-backend-data_0
 
     - pause:
+        # you should check that the /proc/mdstat is empty now
         prompt: "Please check /proc/mdstat and hit ENTER"
 
 # =========================
@@ -143,3 +144,23 @@
         ipv6: "{{ backend.ipv6 }}"
         old_eni: "{{ backend.old_network_id }}"
         new_eni: "{{ backend.new_network_id }}"
+
+- name: "Assemple raid volumes and activate volume groups on new backend"
+  hosts: "backend:&next:&{{ copr_instance }}"
+  remote_user: root
+  tags: unmount_temp_storage
+  tasks:
+    - import_tasks: tasks/assert-instance-id.yml
+      vars:
+        instance_id: "{{ backend.new_instance_id }}"
+
+    - name: Scan and assemble raid volumes
+      shell: "mdadm --assemble --scan"
+      register: raid_assemble
+      failed_when:
+        - raid_assemble.rc != 0
+        - "'No arrays found' not in raid_assemble.stderr"
+      changed_when: raid_assemble.rc == 0
+
+    - name: Scan and assemble raid volumes and activate volume groups
+      ansible.builtin.shell: sleep 10 && vgchange -a y && sleep 5 && vgchange copr-backend-data --setautoactivation y && sleep 5
