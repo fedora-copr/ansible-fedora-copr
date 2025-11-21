@@ -5,15 +5,15 @@ copr_zone: us-east-1c
 
 backend:
   name: copr-backend
-  old_instance_id: i-076c28c04d1783649
-  new_instance_id: i-05873f4014e988b22
-  image: f41
+  old_instance_id: i-05873f4014e988b22
+  new_instance_id: i-05a9acde1fb362465
+  image: f43
   # this is volume `data-copr-upgrade-time-{{ copr_instance }}` that is used as
   # a temporary data volume until the newly installed backend is ready to
   # consume real data volume.
   temp_volume: vol-05282c573e57fdbe5
-  old_network_id: eni-054e0b74e31085b84
-  new_network_id: eni-0ac65da959c71829f
+  old_network_id: eni-0ac65da959c71829f
+  new_network_id: eni-0d7fb113f7b7b76f1
   instance_type: m5a.4xlarge
   root_volume_size: 160
   temp_floating_ip: 54.174.37.189
@@ -31,14 +31,14 @@ backend:
 
 frontend:
   name: copr-frontend
-  image: f41
-  old_instance_id: i-048189a43dcb739a6
-  new_instance_id: i-0b5cfa0628d58cd5c
+  image: f43
+  old_instance_id: i-0b5cfa0628d58cd5c
+  new_instance_id: i-0af9f17142fdbf581
   instance_type: t3a.2xlarge
   security_group: copr-frontend-sg
   root_volume_size: 80
-  old_network_id: eni-01c54e72d68b01a57
-  new_network_id: eni-063ec17815e2f46bd
+  old_network_id: eni-063ec17815e2f46bd
+  new_network_id: eni-0313baffd6a56cb95
   elastic_ip: 3.225.109.36
   ipv6: 2600:1f18:8ee:ae00:9d1f:4737:93ce:6db
 
@@ -58,14 +58,14 @@ frontend:
 
 distgit:
   name: copr-distgit
-  image: f41
-  old_instance_id: i-06535db0487ba6efb
-  new_instance_id: i-0a8176621ca3a0c67
+  image: f43
+  old_instance_id: i-0a8176621ca3a0c67
+  new_instance_id: i-0174850344a7535a0
   instance_type: r7a.xlarge
   security_group: copr-distgit-sg
   root_volume_size: 80
-  old_network_id: eni-06f95e98821036cb4
-  new_network_id: eni-058190b787f5da851
+  old_network_id: eni-058190b787f5da851
+  new_network_id: eni-0ce7fe2d97e848208
   elastic_ip: 52.72.114.126
   ipv6: 2600:1f18:8ee:ae00:41cc:53dc:b87b:2d8c
 
@@ -82,14 +82,14 @@ distgit:
 
 keygen:
   name: copr-keygen
-  image: f41
-  old_instance_id: i-04b9172b4d5448bb9
-  new_instance_id: i-0856694ac4bc7545b
+  image: f43
+  old_instance_id: i-0856694ac4bc7545b
+  new_instance_id: i-0d17baa8b1e6f2ac8
   instance_type: c7a.xlarge
   security_group: copr-keygen-sg
   root_volume_size: 20
-  old_network_id: eni-05ca2cdfe849476e2
-  new_network_id: eni-02e1479848b4515aa
+  old_network_id: eni-02e1479848b4515aa
+  new_network_id: eni-0c3d31c7e10133571
   elastic_ip: 54.83.48.73
   ipv6: 2600:1f18:8ee:ae00:acef:63f0:530a:cdff
 

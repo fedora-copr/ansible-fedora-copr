@@ -49,6 +49,8 @@
     ip: "{{ instance.temp_floating_ip }}"
     in_vpc: true
     state: present
+    region: "us-east-1"
+    profile: "fedora-copr"
   when:
     - instance.temp_floating_ip is defined
 
@@ -57,6 +59,8 @@
     instance: "{{ instances_started.instances[0].instance_id }}"
     id: "{{ instance.temp_volume }}"
     device_name: sdc
+    region: "us-east-1"
+    profile: "fedora-copr"
   when:
     - instance.temp_volume is defined
 
@@ -67,3 +71,4 @@
       - "Instance ID: {{ instances_started.instances[0].instance_id }}"
       - "Network ID: {{ instances_started.instances[0].network_interfaces[0].network_interface_id }}"
       - "Unusable Public IP: {{ instances_started.instances[0].public_ip_address }}"
+      - "Private IP: {{ instances_started.instances[0].private_ip_address }}"
