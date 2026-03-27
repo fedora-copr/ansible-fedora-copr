@@ -26,7 +26,7 @@
       when: server.stop_services.before_backup is defined
 
     - pause:
-        prompt: "Please backup PostgreSQL data now: https://docs.pagure.org/copr.copr/database_backup.html and hit ENTER"
+        prompt: "Please backup PostgreSQL data now: https://docs.copr.fedorainfracloud.org/database_backup.html and hit ENTER"
       when: server_id == 'frontend'
 
     - name: stop other services after the backup
