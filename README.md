@@ -26,7 +26,7 @@ Fedora N+1 (or N+2) upgrade playbooks
 -------------------------------------
 
 First, it is really important to get familiar with the [Fedora Copr docs related
-to instance upgrades](https://docs.pagure.org/copr.copr/how_to_upgrade_persistent_instances.html).
+to instance upgrades](https://docs.copr.fedorainfracloud.org/how_to_upgrade_persistent_instances.html).
 
 These playbooks require you to specify `copr_instance` and `server_id` variables
 explicitly.  For example:
