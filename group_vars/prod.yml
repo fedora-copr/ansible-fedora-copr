@@ -102,3 +102,27 @@ keygen:
     - id: vol-0108e05e229bf7eaf
       mount_points:
         - /var/lib/copr-keygen
+
+rpmeta:
+  name: copr-rpmeta
+  image: f43
+  # TODO: fill in after first migration cycle
+  old_instance_id: null
+  new_instance_id: null
+  instance_type: t3a.small
+  security_group: copr-rpmeta-sg
+  root_volume_size: 20
+  # TODO: fill in after first migration cycle
+  old_network_id: null
+  new_network_id: null
+  elastic_ip: 23.20.56.165
+
+  stop_services:
+    before_backup:
+      - rpmeta
+      - nginx
+
+  data_volumes:
+    - id: null  # TODO: fill in EBS volume ID from AWS console
+      mount_points:
+        - /var/lib/rpmeta

@@ -14,6 +14,7 @@ copr-fe-dev.aws.fedoraproject.org
 copr-dist-git-dev.aws.fedoraproject.org
 copr-keygen-dev.aws.fedoraproject.org
 copr-be-dev-temp.aws.fedoraproject.org
+3.209.163.181
 
 [prod]
 copr-be.aws.fedoraproject.org
@@ -21,6 +22,7 @@ copr-fe.aws.fedoraproject.org
 copr-dist-git.aws.fedoraproject.org
 copr-keygen.aws.fedoraproject.org
 copr-be-temp.aws.fedoraproject.org
+23.20.56.165
 
 [backend]
 copr-be.aws.fedoraproject.org
@@ -39,3 +41,7 @@ copr-dist-git-dev.aws.fedoraproject.org
 [keygen]
 copr-keygen.aws.fedoraproject.org
 copr-keygen-dev.aws.fedoraproject.org
+
+[rpmeta]
+23.20.56.165
+3.209.163.181
