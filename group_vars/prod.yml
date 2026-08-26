@@ -14,7 +14,8 @@ backend:
   temp_volume: vol-05282c573e57fdbe5
   old_network_id: eni-0ac65da959c71829f
   new_network_id: eni-0d7fb113f7b7b76f1
-  instance_type: m5a.4xlarge
+  # workers written in python generate RAM-intensive workflow
+  instance_type: r7a.4xlarge
   root_volume_size: 160
   temp_floating_ip: 54.174.37.189
   elastic_ip: 52.44.175.77
